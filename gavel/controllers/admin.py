@@ -53,12 +53,13 @@ def admin():
 def item():
     action = request.form['action']
     if action == 'Submit':
+        print("submit in")
         data = parse_upload_form()
         if data:
             # validate data
             for index, row in enumerate(data):
-                if len(row) != 3:
-                    return utils.user_error('Bad data: row %d has %d elements (expecting 3)' % (index + 1, len(row)))
+                if len(row) != 4:
+                    return utils.user_error('Bad data: row %d has %d elements (expecting 4)' % (index + 1, len(row)))
             for row in data:
                 _item = Item(*row)
                 db.session.add(_item)
@@ -90,7 +91,10 @@ def allowed_file(filename):
 
 
 def parse_upload_form():
-    f = request.files['file']
+    f = None
+    if 'file' in request.files:
+        f = request.files['file']
+
     data = []
     if f and allowed_file(f.filename):
         extension = str(f.filename.rsplit('.', 1)[1].lower())
@@ -118,6 +122,8 @@ def item_patch():
         item.name = request.form['name']
     if 'description' in request.form:
         item.description = request.form['description']
+    if 'category' in request.form:
+        item.category = request.form['category']
     db.session.commit()
     return redirect(url_for('item_detail', item_id=item.id))
 
